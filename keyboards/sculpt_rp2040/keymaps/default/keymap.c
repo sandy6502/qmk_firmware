@@ -1,20 +1,24 @@
 /*
- * Microsoft Sculpt Ergonomic Keyboard - QMK Firmware Keymap (v6 - Standard & MIT Layouts)
+ * Microsoft Sculpt Ergonomic Keyboard - QMK Firmware Keymap (v7 - Standard & MIT Layouts + DIP Switch Support)
  * Powered by RP2040 and customized for modern QMK layouts.
  *
- * This configuration is designed for dual base profiles, switchable on-the-fly:
- *   - Layer 0 (_STD): Standard keyboard layout.
+ * This configuration defines three layers:
+ *   - Layer 0 (_STD): Standard keyboard layout with standard modifiers.
  *   - Layer 1 (_MIT): Alternate "MIT" keyboard layout where:
- *       - Alt keys are mapped to Control (KC_LCTL, KC_RCTL)
- *       - LGUI/RGUI keys are mapped to Alt (KC_LALT, KC_RALT)
- *       - Control keys are mapped to GUI (KC_LGUI, KC_RGUI)
+ *       - Left Alt -> Control (KC_LCTL)
+ *       - Left GUI -> Alt (KC_LALT)
+ *       - Left Control -> GUI (KC_LGUI)
+ *       - Alt Gr / Right Alt -> Control (KC_RCTL)
+ *       - Right GUI / Right App -> Left Alt (KC_LALT)
+ *       - Right Control -> Right GUI (KC_RGUI)
+ *   - Layer 2 (_MEDIA): Transparent media-keys overlay activated via the GP0 hardware DIP switch.
  *
- * Layer Toggles:
- *   - Shift + F1: Enables Standard Base Layout.
- *   - Shift + F2: Enables MIT Base Layout.
+ * Profile Layer Toggles:
+ *   - Shift + F1: Enables Standard Base Profile (_STD).
+ *   - Shift + F2: Enables MIT Base Profile (_MIT).
  *
  * Hardware Reset (UF2 Bootloader Mode) without unplugging:
- *   - Left Shift + Right Shift + Escape
+ *   - Left Shift + Right Shift + Escape (Press simultaneously)
  */
 
 #include QMK_KEYBOARD_H
@@ -22,11 +26,12 @@
 // Layer definitions
 enum layers {
     _STD = 0,
-    _MIT
+    _MIT,
+    _MEDIA
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    // LAYER 0: STANDARD BASE (Standard Modifier Pinout)
+    // LAYER 0: STANDARD BASE (Standard Modifier Pinout - Function Keys Default)
     [_STD] = LAYOUT_iso(
         // Row 0: Function Row (F1-F12)
         KC_ESC    , KC_F1     , KC_F2     , KC_F3     , KC_F4     , KC_F5     , KC_F6     , KC_F13    , KC_F7     , KC_F8     , KC_F9     , KC_F10    , KC_F11    , KC_F12    , KC_PSCR   , KC_SCRL   , KC_PAUS   ,
@@ -42,7 +47,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_LCTL   , KC_LGUI   , KC_LALT   , KC_SPC    , KC_SPC    , KC_RALT   , KC_RGUI   , KC_RCTL   
     ),
 
-    // LAYER 1: MIT BASE (Swapped Modifier Pinout)
+    // LAYER 1: MIT BASE (Swapped Modifier Pinout - Function Keys Default)
     [_MIT] = LAYOUT_iso(
         // Row 0: Function Row (F1-F12)
         KC_ESC    , KC_F1     , KC_F2     , KC_F3     , KC_F4     , KC_F5     , KC_F6     , KC_F13    , KC_F7     , KC_F8     , KC_F9     , KC_F10    , KC_F11    , KC_F12    , KC_PSCR   , KC_SCRL   , KC_PAUS   ,
@@ -54,10 +59,24 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_CAPS   , KC_A      , KC_S      , KC_D      , KC_F      , KC_G      , KC_H      , KC_J      , KC_K      , KC_L      , KC_SCLN   , KC_QUOT   , KC_ENT    , KC_NUHS   , KC_UP     ,
         // Row 4: Shift, Bottom Row & Arrows
         KC_LSFT   , KC_Z      , KC_X      , KC_C      , KC_V      , KC_B      , KC_N      , KC_M      , KC_COMM   , KC_DOT    , KC_SLSH   , KC_RSFT   , KC_NUBS   , KC_LEFT   , KC_DOWN   , KC_RGHT   ,
-        // Row 5: Spacebars & Swapped Modifier Keys
-        // Left Control -> GUI, GUI -> Alt, Left Alt -> Control
-        // Right Alt -> Control, Right GUI -> Alt, Right Control -> GUI
-        KC_LGUI   , KC_LALT   , KC_LCTL   , KC_SPC    , KC_SPC    , KC_RCTL   , KC_RALT   , KC_RGUI   
+        // Row 5: Spacebars & Custom MIT Modifier Keys
+        KC_LGUI   , KC_LALT   , KC_LCTL   , KC_SPC    , KC_SPC    , KC_RCTL   , KC_LALT   , KC_RGUI   
+    ),
+
+    // LAYER 2: MEDIA OVERLAY (Activated when DIP switch GP0 is in Media position - LOW)
+    [_MEDIA] = LAYOUT_iso(
+        // Row 0: Media Keys (Overlayed over F-Keys when DIP switch is active)
+        KC_ESC    , KC_MUTE   , KC_VOLD   , KC_VOLU   , KC_MPLY   , KC_MPRV   , KC_MNXT   , KC_F13    , KC_WBAK   , KC_WFWD   , KC_WREF   , KC_WSCH   , KC_WFAV   , KC_WHOM   , KC_PSCR   , KC_SCRL   , KC_PAUS   ,
+        // Row 1: All transparent to pass-through base layer keys
+        KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   ,
+        // Row 2: All transparent to pass-through base layer keys
+        KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   ,
+        // Row 3: All transparent to pass-through base layer keys
+        KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   ,
+        // Row 4: All transparent to pass-through base layer keys
+        KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   ,
+        // Row 5: All transparent to pass-through base layer keys
+        KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   , KC_TRNS   
     )
 };
 

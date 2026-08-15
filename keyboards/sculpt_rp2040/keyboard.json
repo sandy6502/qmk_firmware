@@ -22,7 +22,8 @@
         "command": false,
         "backlight": false,
         "rgblight": false,
-        "nkro": true
+        "nkro": true,
+        "dip_switch": true
     },
     "matrix_pins": {
         "rows": [
@@ -876,5 +877,10 @@
                 }
             ]
         }
+    },
+    "dip_switch": {
+        "pins": [
+            "GP0"
+        ]
     }
 }
